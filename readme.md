@@ -4,9 +4,13 @@
 Este reto está diseñado para evaluar habilidades avanzadas en desarrollo de software, arquitectura de código y buenas prácticas. Se debe construir un carrito de compras que permita a los usuarios:
 
 Agregar productos al carrito
+
 Eliminar productos del carrito
+
 Ver el total de la compra
+
 Generar e imprimir una factura
+
 El enfoque debe ser modular, escalable y bien estructurado.
 
 🎯 Requisitos Funcionales
