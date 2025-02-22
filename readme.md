@@ -7,7 +7,7 @@ Agregar productos al carrito
 Eliminar productos del carrito
 Ver el total de la compra
 Generar e imprimir una factura
-El enfoque debe ser modular, escalable y bien estructurado. Se valorará el uso de principios SOLID, patrones de diseño y buenas prácticas de código.
+El enfoque debe ser modular, escalable y bien estructurado.
 
 🎯 Requisitos Funcionales
 Agregar productos al carrito
