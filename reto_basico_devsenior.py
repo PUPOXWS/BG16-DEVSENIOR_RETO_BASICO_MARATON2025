@@ -6,7 +6,7 @@ class CarritoGUI:
     def __init__(self, master):
         self.master = master
         self.master.title("Carrito de Compras")
-        self.master.geometry("750x600")
+        self.master.geometry("800x500")  
         
         self.carrito = []
         
@@ -41,6 +41,9 @@ class CarritoGUI:
         # Configurar expansión
         main_frame.columnconfigure(1, weight=1)
         main_frame.rowconfigure(0, weight=1)
+        
+        self.master.columnconfigure(0, weight=1)
+        self.master.rowconfigure(0, weight=1)
         
     def agregar_producto(self):
         # Crear una ventana de diálogo personalizada
@@ -120,10 +123,144 @@ class CarritoGUI:
     def ver_carrito(self):
         if not self.carrito:
             messagebox.showinfo("Carrito", "El carrito está vacío.")
+            return
+        
+        # Crear una nueva ventana para ver el carrito
+        carrito_window = tk.Toplevel(self.master)
+        carrito_window.title("Ver Carrito")
+        carrito_window.geometry("700x400")
+        carrito_window.transient(self.master)
+        self.center_window(carrito_window)
+        
+        # Crear un Treeview para mostrar los productos
+        tree = ttk.Treeview(carrito_window, columns=("Nombre", "Cantidad", "Precio", "Subtotal", "Descuento", "Total"), show="headings")
+        tree.pack(expand=True, fill='both', padx=10, pady=10)
+        
+        # Configurar encabezados
+        for col in tree["columns"]:
+            tree.heading(col, text=col)
+            tree.column(col, width=100)
+        
+        # Insertar productos en el Treeview
+        for producto in self.carrito:
+            tree.insert("", "end", values=(
+                producto['nombre'],
+                producto['cantidad'],
+                f"${producto['precio']:.2f}",
+                f"${producto['subtotal']:.2f}",
+                f"${producto['descuento']:.2f}",
+                f"${producto['total']:.2f}"
+            ))
+        
+        # Frame para botones y total
+        bottom_frame = ttk.Frame(carrito_window)
+        bottom_frame.pack(fill='x', padx=10, pady=10)
+        
+        # Botón para agregar más unidades
+        ttk.Button(bottom_frame, text="Agregar Unidades", command=lambda: self.agregar_unidades(tree, carrito_window)).pack(side='left', padx=5)
+        ttk.Button(bottom_frame, text="Disminuir Unidades", command=lambda: self.disminuir_unidades(tree, carrito_window)).pack(side='left', padx=5)
+        
+        # Mostrar total
+        total_general = sum(producto['total'] for producto in self.carrito)
+        ttk.Label(bottom_frame, text=f"Total a pagar: ${total_general:.2f}", font=('Arial', 12, 'bold')).pack(side='right', padx=5)
+    
+    def agregar_unidades(self, tree, window):
+        seleccion = tree.selection()
+        if not seleccion:
+            messagebox.showwarning("Selección", "Por favor, seleccione un producto para agregar unidades.")
+            return
+        
+        indice = tree.index(seleccion[0])
+        producto = self.carrito[indice]
+        
+        # Pedir la cantidad a agregar
+        cantidad = simpledialog.askinteger("Agregar Unidades", f"Cantidad actual: {producto['cantidad']}\nCantidad a agregar:", minvalue=1, parent=window)
+        if cantidad is None:
+            return
+        
+        # Actualizar la cantidad y recalcular
+        producto['cantidad'] += cantidad
+        producto['subtotal'] = producto['cantidad'] * producto['precio']
+        
+        # Recalcular descuento
+        if producto['cantidad'] > 5:
+            producto['descuento'] = producto['subtotal'] * 0.1
         else:
-            self.actualizar_lista()
-            total_general = sum(producto['total'] for producto in self.carrito)
-            messagebox.showinfo("Total a Pagar", f"Total a pagar: ${total_general:.2f}")
+            producto['descuento'] = 0
+        
+        producto['total'] = producto['subtotal'] - producto['descuento']
+        
+        # Actualizar el Treeview
+        tree.item(seleccion, values=(
+            producto['nombre'],
+            producto['cantidad'],
+            f"${producto['precio']:.2f}",
+            f"${producto['subtotal']:.2f}",
+            f"${producto['descuento']:.2f}",
+            f"${producto['total']:.2f}"
+        ))
+        
+        # Actualizar el total general
+        total_general = sum(p['total'] for p in self.carrito)
+        for widget in window.winfo_children():
+            if isinstance(widget, ttk.Frame):
+                for child in widget.winfo_children():
+                    if isinstance(child, ttk.Label) and child.cget("text").startswith("Total a pagar:"):
+                        child.config(text=f"Total a pagar: ${total_general:.2f}")
+        
+        # Actualizar la lista principal
+        self.actualizar_lista()
+        
+        messagebox.showinfo("Éxito", f"Se han agregado {cantidad} unidades al producto {producto['nombre']}.")
+    
+    def disminuir_unidades(self, tree, window):
+        seleccion = tree.selection()
+        if not seleccion:
+            messagebox.showwarning("Selección", "Por favor, seleccione un producto para disminuir unidades.")
+            return
+        
+        indice = tree.index(seleccion[0])
+        producto = self.carrito[indice]
+        
+        # Pedir la cantidad a disminuir
+        cantidad = simpledialog.askinteger("Disminuir Unidades", f"Cantidad actual: {producto['cantidad']}\nCantidad a disminuir:", minvalue=1, maxvalue=producto['cantidad']-1, parent=window)
+        if cantidad is None:
+            return
+        
+        # Actualizar la cantidad y recalcular
+        producto['cantidad'] -= cantidad
+        producto['subtotal'] = producto['cantidad'] * producto['precio']
+        
+        # Recalcular descuento
+        if producto['cantidad'] > 5:
+            producto['descuento'] = producto['subtotal'] * 0.1
+        else:
+            producto['descuento'] = 0
+        
+        producto['total'] = producto['subtotal'] - producto['descuento']
+        
+        # Actualizar el Treeview
+        tree.item(seleccion, values=(
+            producto['nombre'],
+            producto['cantidad'],
+            f"${producto['precio']:.2f}",
+            f"${producto['subtotal']:.2f}",
+            f"${producto['descuento']:.2f}",
+            f"${producto['total']:.2f}"
+        ))
+        
+        # Actualizar el total general
+        total_general = sum(p['total'] for p in self.carrito)
+        for widget in window.winfo_children():
+            if isinstance(widget, ttk.Frame):
+                for child in widget.winfo_children():
+                    if isinstance(child, ttk.Label) and child.cget("text").startswith("Total a pagar:"):
+                        child.config(text=f"Total a pagar: ${total_general:.2f}")
+        
+        # Actualizar la lista principal
+        self.actualizar_lista()
+        
+        messagebox.showinfo("Éxito", f"Se han disminuido {cantidad} unidades del producto {producto['nombre']}.")
     
     def eliminar_producto(self):
         if not self.carrito:
@@ -148,7 +285,7 @@ class CarritoGUI:
         # Crear una ventana nueva para el ticket
         ticket_window = tk.Toplevel(self.master)
         ticket_window.title("Ticket de Compra")
-        ticket_window.geometry("500x600")
+        ticket_window.geometry("600x600")
         ticket_window.transient(self.master)  # Hace que la ventana sea hija de la principal
         
         # Centrar la ventana del ticket
@@ -160,7 +297,7 @@ class CarritoGUI:
         
         # Generar el contenido del ticket
         ticket = "=" * 60 + "\n"
-        ticket += "{:^60}\n".format("TICKET DE COMPRA - DEV SENIOR")
+        ticket += "{:^60}\n".format("TICKET DE COMPRA")
         ticket += "=" * 60 + "\n"
         ticket += "Fecha: {}\n".format(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
         ticket += "-" * 60 + "\n"
