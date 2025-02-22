@@ -25,3 +25,6 @@ La factura debe incluir:
 Lista de productos con su cantidad y precio
 El total de la compra
 Fecha de emisión
+
+![Carrito de Compras](proyecto.png)
+
