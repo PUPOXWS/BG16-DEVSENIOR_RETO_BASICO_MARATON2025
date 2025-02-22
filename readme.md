@@ -11,6 +11,8 @@ Ver el total de la compra
 
 Generar e imprimir una factura
 
+Abrir el carrito y agregar mas unidades
+
 El enfoque debe ser modular, escalable y bien estructurado.
 
 🎯 Requisitos Funcionales
@@ -21,6 +23,8 @@ Eliminar productos del carrito
 
 Se debe poder eliminar un producto específico del carrito.
 Calcular el total
+
+Agregar mas unidades del producto al abrir el carrito
 
 Se debe mostrar el total de la compra considerando la cantidad de cada producto.
 Generar e imprimir una factura
