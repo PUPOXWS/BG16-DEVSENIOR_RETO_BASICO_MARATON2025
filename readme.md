@@ -24,7 +24,7 @@ Eliminar productos del carrito
 Se debe poder eliminar un producto específico del carrito.
 Calcular el total
 
-Agregar mas unidades del producto al abrir el carrito
+Agregar o dismunuir unidades del producto al abrir el carrito
 
 Se debe mostrar el total de la compra considerando la cantidad de cada producto.
 Generar e imprimir una factura
